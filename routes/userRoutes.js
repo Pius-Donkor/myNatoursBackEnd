@@ -5,11 +5,9 @@ const userController = require('./../controllers/userController');
 const authenticationController = require('./../controllers/authenticationController');
 
 router.post('/signup', authenticationController.signup);
+router.post('/login', authenticationController.login);
 
-router
-  .route('/')
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+router.route('/').get(userController.getAllUsers);
 
 router
   .route('/:id')
