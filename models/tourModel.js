@@ -122,7 +122,8 @@ tourSchema.pre(/^find/, function(next) {
 
 tourSchema.post(/^find/, function(docs, next) {
   console.log(
-    `the it take for middleware to is ${Date.now() - this.start} milliseconds `
+    `the time it take for middleware to is ${Date.now() -
+      this.start} milliseconds `
   );
   next();
 });

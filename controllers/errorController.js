@@ -6,7 +6,8 @@ const handleCastErrorDB = err => {
 };
 
 const handleDuplicateFieldsDB = err => {
-  const value = err.keyValue.name;
+  // console.log(Object.values(err.keyValue).at(0));
+  const value = Object.values(err.keyValue).at(0);
   const message = `Duplicate field value /"${value}"/ . please use another value`;
   return new AppError(message, 400);
 };
