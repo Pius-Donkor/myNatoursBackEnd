@@ -17,7 +17,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
-    changedPasswordAt: req.body.changedPasswordAt
+    changedPasswordAt: req.body.changedPasswordAt,
+    role: req.body.role
   });
   const token = signupToken(newUser._id);
   res.status(201).json({
@@ -81,6 +82,18 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
   req.user = currentUser;
+
   // moving to the next middleware
   next();
 });
+
+exports.restrictTo = function(...roles) {
+  return async (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action', 403)
+      );
+    }
+    next();
+  };
+};
