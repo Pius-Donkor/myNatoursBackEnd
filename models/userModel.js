@@ -54,6 +54,24 @@ const userSchema = new mongoose.Schema({
   passwordResetExpires: Date
 });
 
+// MIDDLEWARES
+userSchema.pre('save', async function(next) {
+  // The function can only proceed if the password is modified  example when signing up or resetting your password
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  this.passwordConfirm = undefined;
+  next();
+});
+
+userSchema.pre('save', function(next) {
+  if (!this.isModified('password') || this.isNew) return next();
+  this.changedPasswordAt = Date.now() - 1000;
+
+  next();
+});
+
+// INSTANCE METHODS
+
 userSchema.methods.correctPassword = async function(
   candidatePassword,
   userPassword
@@ -82,13 +100,6 @@ userSchema.methods.createPasswordResetToken = function() {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   return resetToken;
 };
-
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  this.passwordConfirm = undefined;
-  next();
-});
 
 const User = mongoose.model('User', userSchema);
 
