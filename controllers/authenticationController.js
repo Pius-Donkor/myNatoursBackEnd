@@ -56,11 +56,14 @@ exports.protect = catchAsync(async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(' ')[1];
   }
-  // console.log(token);
+  console.log(token);
 
   if (!token) {
     return next(
-      new AppError('You are not yet logged in , Please login to get access')
+      new AppError(
+        'You are not yet logged in , Please login to get access',
+        401
+      )
     );
   }
   // 2)verification token
@@ -167,6 +170,35 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // 4) Log the user in , send JWT
 
   const token = signupToken(user._id);
+  res.status(201).json({
+    status: 'success',
+    token
+  });
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Get user from collection
+  const user = await User.findById(req.user._id).select('+password');
+  console.log(user);
+  if (!user)
+    return next(new AppError('This user currently does not exist', 404));
+  // 2) check if posted password is correct
+  if (!(await user.correctPassword(req.body.passwordCurrent, user.password)))
+    return next(
+      new AppError(
+        'The password you entered does not match your current password please try again',
+        404
+      )
+    );
+
+  // 3) If so , update password
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  await user.save();
+
+  // 4) Log user in, send JWT
+  const token = signupToken(user._id);
+
   res.status(201).json({
     status: 'success',
     token
