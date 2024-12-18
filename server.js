@@ -29,7 +29,7 @@ mongoose
 const port = process.env.PORT || 3000;
 
 const server = app.listen(port, () => {
-  console.log('app is running on the server');
+  console.log('app is running on the server', port);
 });
 
 // this is a way to globally handle errors outside the express application , eg: when the database is down for some reason
