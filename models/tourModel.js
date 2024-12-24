@@ -80,7 +80,8 @@ const tourSchema = new mongoose.Schema(
     startDates: [Date],
     secretTour: {
       type: Boolean,
-      default: false
+      default: false,
+      select: false
     }
   },
   {
