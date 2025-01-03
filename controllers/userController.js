@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./handleFactory');
 
 exports.getAllUsers = catchAsync(async (req, res) => {
   const users = await User.find();
@@ -44,7 +45,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 exports.deleteMe = catchAsync(async (req, res, next) => {
-  console.log(req.user);
+  // console.log(req.user);
   await User.findByIdAndUpdate(req.user._id, { active: false });
 
   res.status(204).json({
@@ -59,15 +60,7 @@ exports.getUser = (req, res) => {
     message: 'this route is not implemented'
   });
 };
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'this route is not implemented'
-  });
-};
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'this route is not implemented'
-  });
-};
+
+// don't use this to update a user
+exports.updateUser = factory.updateOne(User);
+exports.deleteUser = factory.deleteOne(User);
