@@ -53,7 +53,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Provide an email and password', 400));
 
   const user = await User.findOne({ email }).select('+password');
-
+  console.log(user);
   if (!email || !(await user.correctPassword(password, user.password)))
     return next(new AppError('Incorrect email or password', 401));
 
@@ -69,7 +69,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(' ')[1];
   }
-  console.log(token);
+  // console.log(token);
 
   if (!token) {
     return next(
