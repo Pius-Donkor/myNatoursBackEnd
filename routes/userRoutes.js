@@ -8,6 +8,10 @@ router.post('/signup', authenticationController.signup);
 router.post('/login', authenticationController.login);
 router.post('/forgotPassword', authenticationController.forgotPassword);
 router.patch('/resetPassword/:token', authenticationController.resetPassword);
+
+// protect the routes after this middleware
+router.use(authenticationController.protect);
+
 router.patch(
   '/changeMyPassword',
   authenticationController.protect,
@@ -23,6 +27,10 @@ router.delete(
   authenticationController.protect,
   userController.deleteMe
 );
+router.route('/me').get(userController.getMe, userController.getUser);
+
+// restrict all routes after this middleware
+router.use(authenticationController.restrictTo('admin', 'lead-guide'));
 
 router.route('/').get(userController.getAllUsers);
 router
