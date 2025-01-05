@@ -3,15 +3,6 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handleFactory');
 
-exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await User.find();
-  res.status(200).json({
-    status: 'success',
-    result: users.length,
-    data: { users }
-  });
-});
-
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
   Object.keys(obj).forEach(el => {
@@ -61,6 +52,13 @@ exports.getUser = (req, res) => {
   });
 };
 
+exports.getMe = (req, res, next) => {
+  if (!req.params.id) req.params.id = req.user._id;
+  next();
+};
+
 // don't use this to update a user
+exports.getUser = factory.getOne(User);
 exports.updateUser = factory.updateOne(User);
+exports.getAllUsers = factory.getAll(User);
 exports.deleteUser = factory.deleteOne(User);
