@@ -37,6 +37,15 @@ router
 router
   .route('/top-5-cheap')
   .get(tourController.aliasTopTours, tourController.getAllTours);
+// finding a tour withing a certain distance from the users location
+router
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(tourController.getToursWithin);
+//  /tours-distance?distance=233&center=-40,45&unit=mi
+//  /tours-distance/233/center/-40,45/unit/mi
+
+// calculating the distances from a users standing position to the tours location
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
 
 router
   .route('/')
