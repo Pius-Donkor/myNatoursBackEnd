@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -21,15 +22,16 @@ app.set('views', path.join(__dirname, 'views'));
 // always remember to call next() after any middleware build
 
 // 1 GLOBAL  MIDDLEWARE
+// serving static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(helmet());
 
-// set security http headers
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// set security http headers
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000,
@@ -41,12 +43,12 @@ app.use('/api', limiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
 
 // Data sanitization against noSQL attacks
 app.use(mongoSanitize());
 // Data sanitization against XSS attacks
 app.use(xss());
-// serving static files
 
 // Protection against parameter pollution
 app.use(
@@ -69,6 +71,7 @@ app.use(
 
 app.use((req, res, next) => {
   console.log(req.headers);
+  console.log(req.cookies);
   req.requestTime = new Date().toISOString();
   next();
 });

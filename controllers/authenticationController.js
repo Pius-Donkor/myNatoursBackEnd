@@ -51,13 +51,22 @@ exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password)
     return next(new AppError('Provide an email and password', 400));
-
   const user = await User.findOne({ email }).select('+password');
   // console.log(user);
   if (!email || !(await user.correctPassword(password, user.password)))
     return next(new AppError('Incorrect email or password', 401));
-  createSendToken(user, 201, res);
+  createSendToken(user, 200, res);
 });
+
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedOut', {
+    httpOnly: true,
+    expires: new Date(Date.now() + 10 * 1000)
+  });
+  res.status(200).json({
+    status: 'success'
+  });
+};
 
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
@@ -67,6 +76,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
   // console.log(token);
 
@@ -99,10 +110,46 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
   req.user = currentUser;
+  res.locals.user = currentUser;
 
   // moving to the next middleware
   next();
 });
+
+// only for rendering pages ,
+
+exports.isLoggedIn = async (req, res, next) => {
+  // 1) Getting token and check of it's there
+
+  if (req.cookies.jwt) {
+    try {
+      // 2)verification token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // 3) check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+      // 4) check if user changed password after the token was issued
+
+      if (currentUser.changedPassword(decoded.iat)) {
+        return next();
+      }
+
+      // THERE IS A LOGGED IN USER
+      res.locals.user = currentUser;
+      return next();
+    } catch (error) {
+      return next();
+    }
+  }
+  // moving to the next middleware
+  next();
+};
 
 exports.restrictTo = function(...roles) {
   return async (req, res, next) => {

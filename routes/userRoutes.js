@@ -6,6 +6,7 @@ const authenticationController = require('./../controllers/authenticationControl
 
 router.post('/signup', authenticationController.signup);
 router.post('/login', authenticationController.login);
+router.get('/logout', authenticationController.logout);
 router.post('/forgotPassword', authenticationController.forgotPassword);
 router.patch('/resetPassword/:token', authenticationController.resetPassword);
 
