@@ -13,21 +13,13 @@ router.patch('/resetPassword/:token', authenticationController.resetPassword);
 // protect the routes after this middleware
 router.use(authenticationController.protect);
 
-router.patch(
-  '/changeMyPassword',
-  authenticationController.protect,
-  authenticationController.updatePassword
-);
+router.patch('/changeMyPassword', authenticationController.updatePassword);
 router.patch(
   '/updateMe',
-  authenticationController.protect,
+  userController.uploadUserPhoto,
   userController.updateMe
 );
-router.delete(
-  '/deleteMe',
-  authenticationController.protect,
-  userController.deleteMe
-);
+router.delete('/deleteMe', userController.deleteMe);
 router.route('/me').get(userController.getMe, userController.getUser);
 
 // restrict all routes after this middleware

@@ -20,5 +20,10 @@ router.get(
   viewsController.getLoginForm
 );
 router.get('/me', authenticationController.protect, viewsController.getAccount);
+router.post(
+  '/submit-user-data',
+  authenticationController.protect,
+  viewsController.updateUserData
+);
 
 module.exports = router;
