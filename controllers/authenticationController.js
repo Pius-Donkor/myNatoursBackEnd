@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('./../utils/appError');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
 
 const signupToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -44,6 +44,9 @@ exports.signup = catchAsync(async (req, res, next) => {
     changedPasswordAt: req.body.changedPasswordAt,
     role: req.body.role
   });
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  // console.log(url);
+  await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, res);
 });
 
@@ -169,19 +172,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
   // 2) generate random token
   const resetToken = user.createPasswordResetToken();
-  user.save({ validateBeforeSave: false });
+  await user.save({ validateBeforeSave: false });
 
-  const resetUrl = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/users/resetPassword/${resetToken}`;
-
-  const message = `Forgot your password ? Submit a path request with your new password and passwordConfirm to :${resetUrl}.\n if you didn't forget your password, please ignore this email!`;
   try {
-    await sendEmail({
-      email: user.email,
-      subject: 'Your password reset token (valid for 10 min)',
-      message
-    });
+    const resetUrl = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/users/resetPassword/${resetToken}`;
+    await new Email(user, resetUrl).sendPasswordReset();
 
     res.status(200).json({
       status: 'success',
@@ -202,7 +199,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  // 1) Get user based on the token
+  // console.log('Received Token from Request:', req.params.token);
+
   const hashedToken = crypto
     .createHash('sha256')
     .update(req.params.token)
@@ -210,23 +208,18 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() }
+    passwordResetExpires: { $gt: Date.now() } // Ensure token is not expired
   });
 
-  // 2) if the token has not expired and there is a user , then set the new user
   if (!user) {
     return next(new AppError('Invalid token or has expired', 400));
   }
+
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save();
-  // 3) Update changedPasswordAt property for the user
-
-  // step 3 was implemented as a document middleware
-
-  // 4) Log the user in , send JWT
 
   createSendToken(user, 200, res);
 });
@@ -234,7 +227,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 exports.updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
   const user = await User.findById(req.user._id).select('+password');
-  // console.log(user);
+
   if (!user)
     return next(new AppError('This user currently does not exist', 404));
   // 2) check if posted password is correct

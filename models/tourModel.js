@@ -173,13 +173,13 @@ tourSchema.pre(/^find/, function(next) {
   next();
 });
 
-tourSchema.post(/^find/, function(docs, next) {
-  console.log(
-    `the time it take for middleware to is ${Date.now() -
-      this.start} milliseconds `
-  );
-  next();
-});
+// tourSchema.post(/^find/, function(docs, next) {
+//   console.log(
+//     `the time it take for middleware to is ${Date.now() -
+//       this.start} milliseconds `
+//   );
+//   next();
+// });
 
 // AGGREGATION MIDDLEWARE
 // tourSchema.pre('aggregate', function(next) {

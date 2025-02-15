@@ -13,6 +13,8 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewsRoute');
 const viewsRouter = require('./routes/viewsRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
+const compression = require('compression');
 
 const app = express();
 
@@ -69,6 +71,7 @@ app.use(
 //   console.log('hello from middleware ✋');
 //   next();
 // });
+app.use(compression());
 
 app.use((req, res, next) => {
   // console.log(req.headers);
@@ -83,6 +86,7 @@ app.use('/', viewsRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 app.all('*', function(req, res, next) {
   // const err = new Error(`can't find ${req.originalUrl} on the server `);
   // err.statusCode = 404;
