@@ -18,6 +18,8 @@ const bookingRouter = require('./routes/bookingRoutes');
 
 const app = express();
 
+app.enable('trust proxy'); //for heroku
+
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 // Middlewares are executed in the order at which they are organized in the code
