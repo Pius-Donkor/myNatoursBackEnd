@@ -3,6 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
+const cors = require('cors');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
@@ -26,7 +27,15 @@ app.set('views', path.join(__dirname, 'views'));
 // always remember to call next() after any middleware build
 
 // 1 GLOBAL  MIDDLEWARE
+
+// Implementing cors
+app.use(cors()); //this is for simple requests (get , post)
+// Access-Control-allow-Origin
 // serving static files
+
+app.options('*', cors()); //for non-simple requests (delete,patch,put)
+// app.options("/api/v1/tours/:id",cors())
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(helmet());
