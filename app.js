@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
+const compression = require('compression');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const AppError = require('./utils/appError');
@@ -14,7 +15,6 @@ const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewsRoute');
 const viewsRouter = require('./routes/viewsRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
-const compression = require('compression');
 
 const app = express();
 
