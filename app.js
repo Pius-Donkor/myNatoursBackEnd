@@ -16,6 +16,7 @@ const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewsRoute');
 const viewsRouter = require('./routes/viewsRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const bookingController = require('./controllers/bookingController');
 
 const app = express();
 
@@ -53,6 +54,12 @@ const limiter = rateLimit({
 
 // limit requests from same IP
 app.use('/api', limiter);
+
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+); // This is done here because we need the session data in raw form
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
