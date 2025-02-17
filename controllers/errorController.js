@@ -85,18 +85,14 @@ const sendErrorDev = (err, req, res) => {
       msg: err.message
     });
   }
-
- 
 };
 
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
   if (process.env.NODE_ENV === 'development') {
-   
     sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
-    
     let error = { ...err };
     error.name = err.name; // Explicitly copy `name`
     error.message = err.message;
@@ -108,7 +104,6 @@ module.exports = (err, req, res, next) => {
       error = handleValidationErrorDB(error);
     if (error.name === 'JsonWebTokenError') error = handleJWTErrorDB();
     if (error.name === 'TokenExpiredError') error = handleTokenExpiredErrorDB();
-  
 
     sendErrorProd(error, req, res);
   }
